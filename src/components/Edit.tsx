@@ -21,33 +21,18 @@ export default function Edit({ todo, close, reload }: EditProps) {
     setContent(e.target.value);
   };
   const handleClickSubmit = () => {
-    if (todo !== null) {
-      const _ = fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/${todo.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: todo.id, title, content }),
+    const _ = fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/${todo?.id ?? ""}`,
+      {
+        method: todo !== null ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      )
-        .then(reload)
-        .then(close);
-    } else {
-      const _postPromise = fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ title, content }),
-        },
-      )
-        .then(reload)
-        .then(close);
-    }
+        body: JSON.stringify({ title, content }),
+      },
+    )
+      .then(reload)
+      .then(close);
   };
   return (
     <div className={styles.overlay}>
