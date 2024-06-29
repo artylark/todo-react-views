@@ -8,10 +8,9 @@ import { Todo } from "@/types/Todo";
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const reloadTodos = async () => {
-    const allTodos: Todo[] = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/get`,
-    ).then((response) => response.json());
-    setTodos(allTodos);
+    await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo`)
+      .then((response) => response.json())
+      .then((todos: Todo[]) => setTodos(todos));
   };
   const [editing, setEditing] = useState<boolean>(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
@@ -26,13 +25,12 @@ export default function Home() {
   const handleClickDelete = (todo: Todo) => () => {
     const confirmed = window.confirm(`Delete "${todo.title}"?`);
     if (confirmed) {
-      const _deletePromise = fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/delete/${todo.id}`,
+      const _ = fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/${todo.id}`,
         {
           method: "DELETE",
         },
-      );
-      const _reloadPromise = reloadTodos();
+      ).then(reloadTodos);
     }
   };
   const close = () => {
@@ -40,8 +38,8 @@ export default function Home() {
     setEditing(false);
   };
   useEffect(() => {
-    const _reloadPromise = reloadTodos();
-  }, [editing]);
+    const _ = reloadTodos();
+  }, []);
   return (
     <>
       <main className={styles.main}>
@@ -85,7 +83,9 @@ export default function Home() {
           </table>
         </div>
       </main>
-      {editing && <Edit todo={editingTodo} close={close} />}
+      {editing && (
+        <Edit todo={editingTodo} close={close} reload={reloadTodos} />
+      )}
     </>
   );
 }

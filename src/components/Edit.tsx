@@ -8,9 +8,10 @@ const CONTENT_SIZE = 80;
 export type EditProps = {
   todo: Todo | null;
   close: () => void;
+  reload: () => Promise<void>;
 };
 
-export default function Edit({ todo, close }: EditProps) {
+export default function Edit({ todo, close, reload }: EditProps) {
   const [title, setTitle] = useState<string>(todo?.title ?? "");
   const [content, setContent] = useState<string>(todo?.content ?? "");
   const handleChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
@@ -21,8 +22,8 @@ export default function Edit({ todo, close }: EditProps) {
   };
   const handleClickSubmit = () => {
     if (todo !== null) {
-      const _putPromise = fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/put/${todo.id}`,
+      const _ = fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/${todo.id}`,
         {
           method: "PUT",
           headers: {
@@ -30,10 +31,12 @@ export default function Edit({ todo, close }: EditProps) {
           },
           body: JSON.stringify({ id: todo.id, title, content }),
         },
-      );
+      )
+        .then(reload)
+        .then(close);
     } else {
       const _postPromise = fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/post`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/todo`,
         {
           method: "POST",
           headers: {
@@ -41,9 +44,10 @@ export default function Edit({ todo, close }: EditProps) {
           },
           body: JSON.stringify({ title, content }),
         },
-      );
+      )
+        .then(reload)
+        .then(close);
     }
-    close();
   };
   return (
     <div className={styles.overlay}>
